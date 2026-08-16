@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Questionnaire — L'épargne logement</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#16243B; --blue:#1F4E79; --blue-2:#2E75B6; --paper:#F5F2EB;
+    --card:#FFFFFF; --ink:#1d2733; --muted:#5d6b7a; --line:#e3ddd0; --gold:#B08D57;
+    --ok:#2F7A4F; --ok-bg:#EAF4ED; --ko:#B23B3B; --ko-bg:#FAEDED;
+    --amber:#B5852A; --amber-bg:#FBF1DC;
+    --shadow:0 1px 2px rgba(22,36,59,.05),0 8px 24px rgba(22,36,59,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Karla',-apple-system,system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:860px;margin:0 auto;padding:28px 20px 64px}
+  .card-main{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+  .header{background:var(--navy);color:#fff;padding:30px 34px}
+  .chapter-tag{display:inline-block;background:rgba(255,255,255,.14);color:#e9eef6;padding:5px 13px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:14px}
+  .chapter-tag span{color:var(--gold)}
+  .header h1{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:clamp(23px,4.2vw,33px);line-height:1.14;letter-spacing:-.01em;margin-bottom:8px}
+  .header p{font-size:14px;color:#b9c4d4}
+  .gold-rule{height:3px;width:60px;background:var(--gold);border:0;margin:16px 0 0}
+  .body{padding:30px 34px}
+  .identity{text-align:center;padding:14px 0}
+  .identity h2{font-family:'Fraunces',serif;font-weight:600;font-size:21px;color:var(--navy);margin-bottom:8px}
+  .identity p.sub{color:var(--muted);margin-bottom:26px;font-size:14.5px}
+  .form-group{margin-bottom:16px;text-align:left;max-width:420px;margin-left:auto;margin-right:auto}
+  .form-group label{display:block;font-size:13px;font-weight:700;color:var(--navy);margin-bottom:6px;letter-spacing:.02em}
+  .form-group input{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:9px;font-size:15px;font-family:'Karla',sans-serif;transition:border-color .2s;background:#fdfcf9}
+  .form-group input:focus{outline:none;border-color:var(--blue-2)}
+  .btn{cursor:pointer;font-family:'Karla',sans-serif;font-weight:700;font-size:15px;letter-spacing:.03em;border-radius:10px;transition:transform .12s,box-shadow .15s,filter .15s,background .15s}
+  .btn-primary{background:var(--blue);color:#fff;border:none;padding:13px 34px;margin:6px}
+  .btn-primary:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 20px rgba(31,78,121,.28)}
+  .btn-primary:disabled{opacity:.45;cursor:not-allowed}
+  .btn-gold{background:var(--gold);color:var(--navy)}
+  .btn-gold:hover:not(:disabled){filter:brightness(1.06);transform:translateY(-2px)}
+  .btn-secondary{background:#fff;color:var(--blue);border:1.5px solid var(--blue);padding:11px 28px;margin:6px}
+  .btn-secondary:hover:not(:disabled){background:#f0f4f9}
+  .btn-secondary:disabled{opacity:.4;cursor:not-allowed;border-color:#bbb;color:#bbb}
+  .stagiaire-bar{background:#efeadf;padding:11px 34px;border-bottom:1px solid var(--line);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .stagiaire-bar strong{color:var(--navy)}
+  .consigne{background:#fff;border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:13.5px;line-height:1.5;color:#3a4654}
+  .consigne b{color:var(--navy)}
+  .meta{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+  .progress{flex:1;min-width:180px}
+  .progress .track{height:8px;background:#e6e0d3;border-radius:99px;overflow:hidden}
+  .progress .fill{height:100%;width:0;background:var(--blue-2);border-radius:99px;transition:width .4s cubic-bezier(.2,.7,.2,1)}
+  .progress .plabel{font-size:12.5px;color:var(--muted);margin-top:6px}
+  .scorepill{font-family:'Fraunces',serif;font-weight:600;color:var(--navy);background:#fff;border:1px solid var(--line);border-radius:99px;padding:7px 15px;font-size:14.5px}
+  .scorepill b{color:var(--blue);font-size:17px}
+  .cq{background:#fff;border:1px solid var(--line);border-radius:11px;padding:16px 18px;margin-bottom:13px;box-shadow:var(--shadow)}
+  .cq .ask{font-weight:600;font-size:15px;color:var(--ink);margin-bottom:10px;display:flex;gap:10px;align-items:flex-start}
+  .cq .ask .qn{flex:none;width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;font-family:'Fraunces',serif;font-weight:600;font-size:13px;display:flex;align-items:center;justify-content:center;margin-top:1px}
+  .theme-tag{display:inline-block;background:#eef3f9;color:var(--blue);font-size:11px;font-weight:700;border-radius:5px;padding:2px 8px;margin-left:8px;letter-spacing:.02em;vertical-align:middle;white-space:nowrap}
+  .multi-tag{display:inline-block;background:#fbf1dc;color:var(--amber);font-size:11px;font-weight:700;border-radius:5px;padding:2px 8px;margin-left:6px;letter-spacing:.02em;vertical-align:middle;white-space:nowrap}
+  select.cs{width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:9px;font-size:14.5px;font-family:'Karla',sans-serif;background:#fdfcf9;color:var(--ink);cursor:pointer;transition:border-color .15s}
+  select.cs:focus{outline:none;border-color:var(--blue-2)}
+  select.cs:disabled{cursor:default;opacity:1}
+  select.cs.ok{border-color:var(--ok);background:var(--ok-bg);color:var(--ok)}
+  select.cs.ko{border-color:var(--ko);background:var(--ko-bg);color:var(--ko)}
+  .checks{display:flex;flex-direction:column;gap:8px}
+  .checks label{display:flex;gap:10px;align-items:flex-start;border:1.5px solid var(--line);border-radius:9px;padding:10px 13px;background:#fdfcf9;cursor:pointer;font-size:14.5px;transition:.15s}
+  .checks label:hover{border-color:var(--blue-2)}
+  .checks label.ok{border-color:var(--ok);background:var(--ok-bg)}
+  .checks label.ko{border-color:var(--ko);background:var(--ko-bg)}
+  .checks input{margin-top:3px}
+  .open-tag{display:inline-block;background:#eaf4ed;color:var(--ok);font-size:11px;font-weight:700;border-radius:5px;padding:2px 8px;margin-left:6px;letter-spacing:.02em;vertical-align:middle;white-space:nowrap}
+  textarea.oa{width:100%;min-height:96px;padding:11px 13px;border:1.5px solid var(--line);border-radius:9px;font-size:14.5px;font-family:'Karla',sans-serif;background:#fdfcf9;color:var(--ink);resize:vertical;line-height:1.5}
+  textarea.oa:focus{outline:none;border-color:var(--blue-2)}
+  textarea.oa:disabled{cursor:default;opacity:1;background:#f7f5ef;border-color:var(--gold)}
+  .oa-hint{font-size:11.5px;color:var(--muted);margin-top:5px;font-style:italic}
+  .model{background:#f7f5ef;border:1px solid var(--gold);border-radius:9px;padding:13px 15px;margin-top:11px}
+  .model h5{margin:0 0 7px;font-family:'Fraunces',Georgia,serif;font-size:14px;color:var(--navy)}
+  .model p{margin:0 0 7px;font-size:13.5px;line-height:1.55}
+  .model ul{margin:6px 0 0;padding-left:17px;font-size:13px}
+  .model li{margin-bottom:3px}
+  .model .ref{color:var(--gold);font-weight:700;font-size:11.5px}
+  .model .note{font-size:12px;color:var(--muted);font-style:italic;margin-top:8px;padding-top:7px;border-top:1px dashed var(--line)}
+  .pass-banner{border-radius:10px;padding:15px 18px;margin:14px 0 4px;font-size:14.5px;line-height:1.55}
+  .pass-banner.ok{background:var(--ok-bg);border:1.5px solid var(--ok);color:#1f5c39}
+  .pass-banner.ko{background:var(--amber-bg);border:1.5px solid var(--amber);color:#8a6420}
+  .pass-banner b{display:block;font-family:'Fraunces',Georgia,serif;font-size:16px;margin-bottom:5px}
+  .cfb{max-height:0;overflow:hidden;opacity:0;transition:max-height .4s,opacity .35s;font-size:13px;border-left:3px solid var(--line);padding-left:14px}
+  .cfb.show{max-height:320px;opacity:1;margin-top:12px}
+  .cfb.good{border-color:var(--ok);color:#1c5234} .cfb.bad{border-color:var(--ko);color:#7a2222}
+  .cfb .vd{font-weight:700}
+  .cfb .ref{display:inline-block;margin-top:6px;font-size:12px;color:var(--blue);background:#eef3f9;border-radius:6px;padding:2px 8px;font-weight:600}
+  .actions{margin-top:24px;text-align:center}
+  .result-screen{text-align:center;padding:20px 0}
+  .score-circle{width:132px;height:132px;border-radius:50%;margin:0 auto 18px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;box-shadow:0 8px 24px rgba(22,36,59,.18)}
+  .score-circle.excellent{background:var(--ok)} .score-circle.good{background:var(--blue)}
+  .score-circle.average{background:var(--amber)} .score-circle.poor{background:var(--ko)}
+  .score-circle .sv{font-family:'Fraunces',serif;font-size:30px;font-weight:600}
+  .score-circle .sl{font-size:12px;opacity:.95;margin-top:2px;letter-spacing:.05em}
+  .result-msg{font-family:'Fraunces',serif;font-size:21px;font-weight:600;margin-bottom:8px;color:var(--navy)}
+  .result-detail{color:var(--muted);font-size:14px;margin-bottom:20px;max-width:56ch;margin-left:auto;margin-right:auto}
+  .recap{text-align:left;max-width:600px;margin:0 auto 8px}
+  .recap h4{font-family:'Fraunces',serif;font-weight:600;font-size:15px;color:var(--navy);margin-bottom:6px}
+  .recap-row{display:flex;align-items:center;gap:11px;padding:9px 4px;border-bottom:1px solid var(--line);font-size:13.5px}
+  .recap-row .dot{flex:none;width:11px;height:11px;border-radius:50%}
+  .recap-row .lab{flex:1;color:var(--ink)}
+  .recap-row .sc{font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums}
+  .recap-row .hint{flex-basis:100%;font-size:12px;color:var(--blue);padding-left:22px}
+  .pdf-info{background:var(--amber-bg);border-left:4px solid var(--amber);padding:12px 16px;border-radius:8px;text-align:left;font-size:13px;color:#6d4c00;margin:18px 0}
+  .pdf-info strong{display:block;margin-bottom:4px}
+  .note{background:#eef3f9;border-left:4px solid var(--blue-2);padding:12px 16px;border-radius:8px;text-align:left;font-size:13px;color:var(--blue);margin:16px 0;line-height:1.5}
+  footer{margin-top:26px;text-align:center;font-size:12px;color:#9a9384;letter-spacing:.04em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card-main">
+    <div class="header">
+      <div class="chapter-tag">TMK Performances — Les fondamentaux de l'épargne <span>/</span> Séquence 3</div>
+      <h1>Questionnaire — L'épargne logement</h1>
+      <p>15 questions · seuil de réussite 70 %</p>
+      <hr class="gold-rule">
+    </div>
+
+    <div id="screen-identity" class="body">
+      <div class="identity">
+        <h2>Avant de commencer</h2>
+        <p class="sub">Renseignez vos informations pour personnaliser votre attestation de réussite.</p>
+        <div class="form-group"><label for="nom">Nom</label><input type="text" id="nom" placeholder="Votre nom de famille" autocomplete="family-name"></div>
+        <div class="form-group"><label for="prenom">Prénom</label><input type="text" id="prenom" placeholder="Votre prénom" autocomplete="given-name"></div>
+        <button class="btn btn-primary" id="btn-start" disabled onclick="startQuiz()">Commencer l'évaluation</button>
+      </div>
+    </div>
+
+    <div id="screen-quiz" style="display:none;">
+      <div class="stagiaire-bar"><span>Stagiaire&nbsp;: <strong id="stagiaire-name"></strong></span><span id="date-quiz"></span></div>
+      <div class="body">
+        <div class="consigne"><b>Évaluation de la séquence 3.</b> Quinze questions sur le compte et le plan d'épargne logement : ce qui les distingue, le taux fixé à l'ouverture, les deux durées à ne pas confondre, le droit à prêt et la fiscalité. Certaines questions appellent <b>plusieurs réponses</b> : elles sont signalées et ne sont comptées justes que si la sélection est exactement correcte. Répondez à toutes les questions, puis validez : votre attestation est générée automatiquement. Vous pourrez refaire le questionnaire pour vous entraîner, sans nouvelle attestation.</div>
+        <div class="meta">
+          <div class="progress"><div class="track"><div class="fill" id="fill"></div></div><div class="plabel" id="plabel">0 / 15 répondu</div></div>
+          <div class="scorepill">Score&nbsp;: <b id="score">—</b> / 15</div>
+        </div>
+        <div id="qcm"></div>
+        <div class="actions"><button class="btn btn-primary" id="btn-validate" disabled onclick="validateQuiz()">Validation et génération du PDF</button></div>
+      </div>
+    </div>
+
+    <div id="screen-result" style="display:none;">
+      <div class="stagiaire-bar"><span>Stagiaire&nbsp;: <strong id="stagiaire-name-2"></strong></span><span id="date-quiz-2"></span></div>
+      <div class="body">
+        <div class="result-screen">
+          <div class="score-circle" id="score-circle"><div class="sv" id="score-value">0/15</div><div class="sl" id="score-label">questions</div></div>
+          <div class="result-msg" id="result-message"></div>
+          <div id="pass-banner" style="display:none;"></div>
+          <div class="result-detail" id="result-detail"></div>
+          <div class="recap" id="recap-block"><h4>Bilan par thème</h4><div id="recap-list"></div></div>
+          <div class="note" id="note-pdf" style="display:none;"></div>
+          <div class="actions">
+            <button class="btn btn-secondary" id="btn-restart" onclick="restartQuiz()">↻ Refaire l'évaluation</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>TMK Performances · Les fondamentaux de l'épargne · Séquence 3</footer>
+  </div>
+</div>
+
+<script>
+const CFG = {"THEME_INFO": {"N": {"label": "La nature du produit"}, "D": {"label": "Le compte et le plan"}, "T": {"label": "Le taux et les durées"}, "P": {"label": "Droit à prêt et fiscalité"}}, "THEME_ORDER": ["N", "D", "T", "P"], "QUESTIONS": [{"th": "N", "kind": "qcm", "ask": "Qu'est-ce qui distingue fondamentalement l'épargne logement d'un livret réglementé ?", "options": ["Son plafond de versements, plus élevé", "C'est un contrat avec une durée, dont la contrepartie est un droit à emprunter", "Sa rémunération, toujours supérieure", "Le fait qu'elle soit réservée aux propriétaires"], "correct": [1], "multi": false, "expl": "La différence n'est pas de degré mais de nature. Un livret est un compte disponible ; l'épargne logement est un contrat sur lequel on s'engage, et qui ouvre un droit à prêt à un taux connu d'avance.", "ref": "Séquence 3 — la nature du produit"}, {"th": "N", "kind": "qcm", "ask": "Un client n'a aucun projet immobilier. Que lui dire de l'épargne logement ?", "options": ["Qu'elle lui est interdite", "Qu'il peut y trouver un intérêt d'épargne, mais qu'il passe à côté de la moitié du dispositif", "Qu'elle est toujours plus intéressante qu'un livret", "Qu'il doit obligatoirement demander le prêt à l'échéance"], "correct": [1], "multi": false, "expl": "Le droit à prêt est la contrepartie qui justifie l'existence du produit. Sans projet, l'arbitrage se pose autrement.", "ref": "Séquence 3 — la nature du produit"}, {"th": "D", "kind": "qcm", "ask": "Que se passe-t-il lorsqu'un client effectue un retrait sur son plan d'épargne logement ?", "options": ["Rien de particulier, comme sur un livret", "Le plan est clôturé", "Les versements sont suspendus pendant un an", "Le taux est révisé à la baisse"], "correct": [1], "multi": false, "expl": "C'est la différence la plus importante avec le compte, et celle que les clients ignorent le plus souvent. Sur le compte, un retrait ne ferme rien.", "ref": "Séquence 3 — le plan"}, {"th": "D", "kind": "qcm", "ask": "Quelles contraintes pèsent sur le plan d'épargne logement ? (plusieurs réponses)", "options": ["Un versement initial minimum à l'ouverture", "Un versement annuel minimum, fractionnable", "La clôture en cas de retrait", "L'obligation de contracter le prêt à l'échéance"], "correct": [0, 1, 2], "multi": true, "expl": "Le droit à prêt est un droit, jamais une obligation. Le client reste libre de ne pas l'exercer.", "ref": "Séquence 3 — le plan"}, {"th": "D", "kind": "qcm", "ask": "Un client dont le plan est arrivé à son plafond souhaite continuer à épargner pour son projet immobilier. Que lui proposer ?", "options": ["Ouvrir un second plan", "Ouvrir un compte épargne logement, cumulable avec le plan", "Clôturer le plan et en rouvrir un", "Attendre le relèvement du plafond"], "correct": [1], "multi": false, "expl": "On ne détient qu'un plan à la fois, mais le compte se cumule avec lui — et leurs droits à prêt peuvent s'additionner sous conditions.", "ref": "Séquence 3 — le compte"}, {"th": "D", "kind": "qcm", "ask": "Un client aux revenus irréguliers hésite entre le compte et le plan. Que lui conseiller ?", "options": ["Le plan, plus rémunérateur", "Le compte, car le plan impose un versement annuel minimum", "Le plan, en suspendant les versements les mauvaises années", "Ni l'un ni l'autre"], "correct": [1], "multi": false, "expl": "Un client qui ne peut pas tenir le versement annuel minimum s'expose à des difficultés. La souplesse du compte se paie par une rémunération plus faible : c'est un arbitrage assumé.", "ref": "Séquence 3 — le compte"}, {"th": "T", "kind": "qcm", "ask": "Comment évolue le taux d'un plan d'épargne logement au cours de sa vie ?", "options": ["Il est révisé chaque année, comme celui d'un livret", "Il est fixé à l'ouverture et garanti jusqu'au terme du plan", "Il suit l'inflation", "Il est révisé tous les cinq ans"], "correct": [1], "multi": false, "expl": "C'est la caractéristique la plus mal comprise du produit. Deux plans ouverts à deux années différentes ne servent donc pas la même rémunération.", "ref": "Séquence 3 — le taux"}, {"th": "T", "kind": "qcm", "ask": "Un client vous parle « de son PEL ». Quelle question poser avant toute autre réponse ?", "options": ["Combien y a-t-il dessus ?", "De quand date-t-il ?", "Avez-vous un projet immobilier ?", "Qui vous l'a ouvert ?"], "correct": [1], "multi": false, "expl": "Sans la date d'ouverture, aucune réponse fiable n'est possible : ni sur la rémunération, ni sur la fiscalité, ni sur le droit à prêt.", "ref": "Séquence 3 — le taux"}, {"th": "T", "kind": "qcm", "ask": "Que recouvrent les deux durées d'un plan d'épargne logement ? (plusieurs réponses)", "options": ["Une durée au-delà de laquelle on ne peut plus verser", "Une durée au terme de laquelle le plan prend fin", "Une durée pendant laquelle le taux est garanti puis révisé", "Une durée minimale avant tout retrait autorisé"], "correct": [0, 1], "multi": true, "expl": "Les versements cessent au bout de dix ans, le plan lui-même s'achève au bout de quinze ans pour les plans ouverts depuis mars 2011. Le taux, lui, n'est jamais révisé.", "ref": "Séquence 3 — les durées"}, {"th": "T", "kind": "qcm", "ask": "Un plan a atteint sa durée maximale de versement. Que devient-il ?", "options": ["Il est automatiquement clôturé", "Il continue de produire des intérêts sur les sommes déjà versées, sans nouveaux versements possibles", "Son taux est ramené à celui du livret A", "Les intérêts cessent de courir"], "correct": [1], "multi": false, "expl": "C'est la confusion classique entre la durée de versement et la durée du plan. Le contrat vit encore plusieurs années après le dernier versement possible.", "ref": "Séquence 3 — les durées"}, {"th": "T", "kind": "qcm", "ask": "Que se passe-t-il pour un plan qui atteint sa durée maximale ?", "options": ["Il se transforme en compte épargne logement", "Les sommes sont transférées sur un produit d'épargne ordinaire et la rémunération avantageuse disparaît", "Il est reconduit automatiquement pour quinze ans", "Le capital est versé au client sans autre formalité"], "correct": [1], "multi": false, "expl": "Les premiers plans soumis à cette limite arrivent à échéance depuis mars 2026. Des clients vont le découvrir sans avoir été prévenus : c'est un motif d'appel légitime et une occasion de conseil.", "ref": "Séquence 3 — les durées"}, {"th": "P", "kind": "qcm", "ask": "De quoi dépend le montant du prêt auquel un plan ouvre droit ?", "options": ["Du capital versé", "Des intérêts acquis pendant la phase d'épargne", "De la durée restant à courir", "Des revenus du client au moment de la demande"], "correct": [1], "multi": false, "expl": "Plus le client a acquis d'intérêts, plus le montant empruntable est élevé. Le taux de ce prêt est lui aussi connu dès l'ouverture.", "ref": "Séquence 3 — le droit à prêt"}, {"th": "P", "kind": "qcm", "ask": "Un client détient un plan ancien, ouvert à une époque de taux élevés. Que dire de son droit à prêt ?", "options": ["Il donne droit à un prêt particulièrement avantageux", "Il donne droit à un prêt cher, à comparer aux conditions du marché du moment", "Il ne donne plus droit à aucun prêt", "Le taux du prêt sera celui du marché à la date de la demande"], "correct": [1], "multi": false, "expl": "Le taux du prêt est fixé à l'ouverture comme celui de l'épargne. Un plan ancien a mieux rémunéré l'épargne mais donne droit à un prêt plus coûteux : le droit à prêt ne se juge qu'en le comparant au marché.", "ref": "Séquence 3 — le droit à prêt"}, {"th": "P", "kind": "qcm", "ask": "Que dire de la fiscalité des intérêts de l'épargne logement ?", "options": ["Ils sont exonérés d'impôt et de prélèvements sociaux, comme le livret A", "Ils sont soumis aux prélèvements sociaux, et à l'impôt sur le revenu pour les contrats ouverts à partir de 2018", "Ils sont soumis à l'impôt mais pas aux prélèvements sociaux", "Ils sont exonérés si le prêt est effectivement contracté"], "correct": [1], "multi": false, "expl": "Contrairement au livret A, ce n'est pas une épargne défiscalisée. Les contrats plus anciens conservent leur régime propre, ce qui renforce encore l'importance de la date d'ouverture.", "ref": "Séquence 3 — la fiscalité"}, {"th": "P", "kind": "qcm", "ask": "Le droit à prêt d'un plan est-il une obligation pour le client ?", "options": ["Oui, sans quoi le plan est requalifié", "Non : c'est un droit, que le client reste libre de ne pas exercer", "Oui, à partir de la durée minimale", "Non, mais il perd alors ses intérêts"], "correct": [1], "multi": false, "expl": "Le client peut parfaitement mener son plan à terme et ne jamais emprunter. Le dire évite un malentendu fréquent à l'ouverture.", "ref": "Séquence 3 — le droit à prêt"}], "HAS_THEMES": true, "PASS": 70, "PASS_OK": "Le seuil de 70 % est atteint. Vous pouvez aborder la séquence 4, consacrée à l'assurance vie.", "PASS_KO": "Le seuil de 70 % n'est pas atteint. Reprenez les corrections ci-dessous, puis <strong>refaites ce questionnaire</strong> pour vous entraîner.", "PDF": {"header": "TMK PERFORMANCES — LES FONDAMENTAUX DE L'EPARGNE · SEQUENCE 3", "att_title": "Attestation — questionnaire de la séquence 3", "att_sub": "L'épargne logement", "footer": "TMK Performances · Les fondamentaux de l'épargne · Séquence 3", "fname": "Attestation_Epargne_S3_QCM"}};
+const THEME_INFO = CFG.THEME_INFO, THEME_ORDER = CFG.THEME_ORDER;
+const QUESTIONS = CFG.QUESTIONS, TOTAL = QUESTIONS.length, HAS_THEMES = CFG.HAS_THEMES;
+const IS_OPEN = (c)=>c.kind==="open";
+const QCM_N = QUESTIONS.filter(c=>!IS_OPEN(c)).length;
+const OPEN_N = TOTAL - QCM_N;
+const PASS = CFG.PASS, PASS_OK = CFG.PASS_OK, PASS_KO = CFG.PASS_KO;
+const PDF = CFG.PDF;
+
+const state = { nom:"", prenom:"", answers:{}, validated:false, score:0, pdfGenerated:false, dateQuiz:null };
+
+document.getElementById("nom").addEventListener("input", checkIdentity);
+document.getElementById("prenom").addEventListener("input", checkIdentity);
+function checkIdentity(){const n=document.getElementById("nom").value.trim(),p=document.getElementById("prenom").value.trim();document.getElementById("btn-start").disabled=!(n&&p);}
+
+function startQuiz(){
+  state.nom=document.getElementById("nom").value.trim().toUpperCase();
+  let p=document.getElementById("prenom").value.trim();
+  state.prenom=p.charAt(0).toUpperCase()+p.slice(1).toLowerCase();
+  state.dateQuiz=new Date();
+  const full=state.prenom+" "+state.nom;
+  document.getElementById("stagiaire-name").textContent=full;
+  document.getElementById("stagiaire-name-2").textContent=full;
+  const d=state.dateQuiz.toLocaleDateString("fr-FR",{day:"2-digit",month:"long",year:"numeric"});
+  document.getElementById("date-quiz").textContent=d; document.getElementById("date-quiz-2").textContent=d;
+  document.getElementById("screen-identity").style.display="none";
+  document.getElementById("screen-quiz").style.display="block";
+  if(!HAS_THEMES) document.getElementById("recap-block").style.display="none";
+  render();
+}
+
+function themeTag(c){
+  if(!c.th || !THEME_INFO[c.th]) return "";
+  return `<span class="theme-tag">${c.th} · ${THEME_INFO[c.th].label}</span>`;
+}
+
+function render(){
+  const qcm=document.getElementById("qcm"); qcm.innerHTML="";
+  QUESTIONS.forEach((c,i)=>{
+    const tag=themeTag(c);
+    let control;
+    if(IS_OPEN(c)){
+      const prev=state.answers[i]||"";
+      control=`<div class="open-tag">Question ouverte</div><textarea class="oa" data-q="${i}" rows="4" placeholder="Rédigez votre réponse, comme à l'examen — en phrases complètes.">${prev}</textarea><div class="oa-hint">Réponse attendue : ${c.minlen} caractères minimum. La réponse attendue s'affichera après validation : c'est à vous de confronter la vôtre.</div>`;
+    } else if(c.multi){
+      let boxes="";
+      c.options.forEach((o,oi)=>{boxes+=`<label data-opt="${oi}"><input type="checkbox" data-q="${i}" value="${oi}"><span>${o}</span></label>`;});
+      control=`<div class="multi-tag">Plusieurs réponses</div><div class="checks" data-q="${i}">${boxes}</div>`;
+    } else {
+      let opts='<option value="">— choisir une réponse —</option>';
+      c.options.forEach((o,oi)=>opts+=`<option value="${oi}">${o}</option>`);
+      control=`<select class="cs" data-q="${i}">${opts}</select>`;
+    }
+    qcm.innerHTML+=`<div class="cq"><div class="ask"><span class="qn">${i+1}</span><span>${c.ask}${tag}</span></div>${control}<div class="cfb" id="cfb-${i}"></div></div>`;
+  });
+  document.querySelectorAll("select.cs").forEach(s=>s.addEventListener("change",onSelect));
+  document.querySelectorAll(".checks input").forEach(s=>s.addEventListener("change",onCheck));
+  document.querySelectorAll("textarea.oa").forEach(s=>s.addEventListener("input",onOpen));
+  update();
+}
+
+function onSelect(e){ if(state.validated)return; const i=+e.currentTarget.dataset.q,v=e.currentTarget.value; if(v==="") delete state.answers[i]; else state.answers[i]=+v; update(); }
+function onCheck(e){
+  if(state.validated)return; const i=+e.currentTarget.dataset.q;
+  const checked=[...document.querySelectorAll(`.checks input[data-q="${i}"]:checked`)].map(x=>+x.value);
+  if(checked.length===0) delete state.answers[i]; else state.answers[i]=checked.sort((a,b)=>a-b);
+  update();
+}
+
+function onOpen(e){
+  if(state.validated)return; const i=+e.currentTarget.dataset.q, v=e.currentTarget.value.trim();
+  if(v.length < QUESTIONS[i].minlen) delete state.answers[i]; else state.answers[i]=e.currentTarget.value.trim();
+  update();
+}
+
+function update(){
+  const n=Object.keys(state.answers).length;
+  document.getElementById("fill").style.width=(n/TOTAL*100)+"%";
+  document.getElementById("plabel").textContent=n+" / "+TOTAL+" répondu"+(n>1?"es":"");
+  document.getElementById("btn-validate").disabled=(n!==TOTAL);
+}
+
+function isCorrect(c, ans){
+  if(IS_OPEN(c)) return null;          // non notée automatiquement
+  if(ans==null) return false;
+  if(c.multi){
+    const a=[...ans].sort((x,y)=>x-y).join(","), g=[...c.correct].sort((x,y)=>x-y).join(",");
+    return a===g;
+  }
+  return ans===c.correct[0];
+}
+function answerLabel(c, ans){
+  if(ans==null) return "—";
+  if(c.multi) return ans.map(i=>c.options[i]).join(" ; ");
+  return c.options[ans];
+}
+function correctLabel(c){
+  return c.correct.map(i=>c.options[i]).join(" ; ");
+}
+
+function themeStats(){
+  const st={}; THEME_ORDER.forEach(t=>st[t]={ok:0,total:0});
+  QUESTIONS.forEach((c,i)=>{ if(IS_OPEN(c)||!st[c.th])return; st[c.th].total++; if(isCorrect(c,state.answers[i])) st[c.th].ok++; });
+  return st;
+}
+
+function validateQuiz(){
+  if(state.validated)return; state.validated=true;
+  let score=0;
+  QUESTIONS.forEach((c,i)=>{
+    const ans=state.answers[i], ok=isCorrect(c,ans); if(ok)score++;
+    if(IS_OPEN(c)){
+      const ta=document.querySelector(`textarea.oa[data-q="${i}"]`); ta.disabled=true;
+      const pts=(c.points&&c.points.length)?`<ul>${c.points.map(x=>`<li>${x}</li>`).join("")}</ul>`:"";
+      const rf=c.ref?`<p class="ref">${c.ref}</p>`:"";
+      const f0=document.getElementById("cfb-"+i);
+      f0.className="cfb good";
+      f0.innerHTML=`<div class="model"><h5>La réponse attendue</h5><p>${c.model}</p>${pts}${rf}<p class="note">Cette question n'est pas notée automatiquement : confrontez votre rédaction à la réponse attendue. Votre texte et la réponse attendue figurent tous deux dans votre attestation PDF.</p></div>`;
+      requestAnimationFrame(()=>f0.classList.add("show"));
+      return;
+    }
+    if(c.multi){
+      const cont=document.querySelector(`.checks[data-q="${i}"]`);
+      cont.querySelectorAll("input").forEach(x=>x.disabled=true);
+      c.correct.forEach(g=>cont.querySelector(`label[data-opt="${g}"]`).classList.add("ok"));
+      (ans||[]).forEach(a=>{ if(!c.correct.includes(a)) cont.querySelector(`label[data-opt="${a}"]`).classList.add("ko"); });
+    } else {
+      const sel=document.querySelector(`select.cs[data-q="${i}"]`); sel.disabled=true;
+      sel.classList.add(ok?"ok":"ko");
+    }
+    const f=document.getElementById("cfb-"+i);
+    f.className="cfb "+(ok?"good":"bad");
+    const vd=ok?"Exact.":((c.multi?"Bonnes réponses : ":"Bonne réponse : ")+correctLabel(c)+".");
+    const refLine=c.ref?`<br><span class="ref">${c.ref}</span>`:"";
+    f.innerHTML=`<span class="vd">${vd}</span> ${c.expl}${refLine}`;
+    requestAnimationFrame(()=>f.classList.add("show"));
+  });
+  state.score=score;
+  document.getElementById("score").textContent=score;
+  document.getElementById("btn-validate").disabled=true;
+  generatePDF();
+  showResults();
+}
+
+function showResults(){
+  const pct=Math.round(state.score/QCM_N*100);
+  document.getElementById("screen-result").style.display="block";
+  document.getElementById("score-value").textContent=state.score+"/"+QCM_N;
+  const sl=document.getElementById("score-label"); if(sl) sl.textContent = OPEN_N ? "questions à choix" : "questions";
+  const c=document.getElementById("score-circle"),m=document.getElementById("result-message"),d=document.getElementById("result-detail");
+  const suffix = OPEN_N ? " Vos "+OPEN_N+" question"+(OPEN_N>1?"s":"")+" ouverte"+(OPEN_N>1?"s ne sont":" n'est")+" pas notée"+(OPEN_N>1?"s":"")+" : confrontez votre rédaction à la réponse attendue, affichée sous chacune." : "";
+  c.className="score-circle";
+  if(PASS){
+    const ok = pct>=PASS;
+    c.classList.add(ok?(pct>=90?"excellent":"good"):(pct>=50?"average":"poor"));
+    m.textContent = ok ? "Objectif atteint" : "Objectif non atteint";
+    d.textContent = (ok?"Vous êtes au-dessus du seuil de "+PASS+" %.":"Vous êtes en dessous du seuil de "+PASS+" %.")+suffix;
+    const b=document.getElementById("pass-banner");
+    b.className="pass-banner "+(ok?"ok":"ko");
+    b.innerHTML = ok
+      ? `<b>Réussite — ${pct} % de bonnes réponses</b>${PASS_OK||"Vous avez atteint le seuil de "+PASS+" %. Les acquis de la journée sont consolidés : vous pouvez aborder la suite du parcours."}`
+      : `<b>Seuil non atteint — ${pct} % de bonnes réponses</b>${PASS_KO||"Le seuil de réussite est fixé à "+PASS+" %. Reprenez les fiches mémo et les séquences des thèmes en rouge, puis <strong>refaites ce QCM afin de vous entraîner</strong> : c'est en le repassant que les automatismes s'installent."}`;
+    b.style.display="block";
+  }
+  else if(pct>=90){c.classList.add("excellent");m.textContent="Évaluation validée — Excellent !";d.textContent="Vous maîtrisez l'ensemble des notions du module."+suffix;}
+  else if(pct>=70){c.classList.add("good");m.textContent="Évaluation validée";d.textContent="Bon niveau global. Le détail commenté de vos réponses figure ci-dessus."+suffix;}
+  else if(pct>=50){c.classList.add("average");m.textContent="Presque — à consolider";d.textContent="Acquis partiels. Le détail commenté de chaque réponse figure ci-dessus."+suffix;}
+  else{c.classList.add("poor");m.textContent="À retravailler";d.textContent="Le détail commenté reprend la bonne réponse et l'explication de chaque question."+suffix;}
+
+  if(HAS_THEMES){
+    const st=themeStats(); let html="";
+    THEME_ORDER.forEach(t=>{
+      const s=st[t]; if(!s||s.total===0) return;
+      const full=(s.ok===s.total);
+      const color=full?"var(--ok)":(s.ok===0?"var(--ko)":"var(--amber)");
+      html+=`<div class="recap-row"><span class="dot" style="background:${color}"></span><span class="lab">${t} · ${THEME_INFO[t].label}</span><span class="sc">${s.ok} / ${s.total}</span></div>`;
+    });
+    document.getElementById("recap-list").innerHTML=html;
+  }
+  const np=document.getElementById("note-pdf");
+  if(state.pdfGenerated){np.textContent="✓ Votre attestation PDF a été générée et téléchargée pour cette session. Vous pouvez refaire l'évaluation, mais aucun nouveau PDF ne sera généré.";np.style.display="block";}
+  document.getElementById("screen-result").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function restartQuiz(){
+  state.answers={};state.validated=false;state.score=0;state.dateQuiz=new Date();
+  const d=state.dateQuiz.toLocaleDateString("fr-FR",{day:"2-digit",month:"long",year:"numeric"});
+  document.getElementById("date-quiz").textContent=d;document.getElementById("date-quiz-2").textContent=d;
+  document.getElementById("score").textContent="—";
+  const bv=document.getElementById("btn-validate");
+  if(state.pdfGenerated) bv.textContent="Valider l'évaluation";
+  document.getElementById("note-pdf").style.display="none";
+  const pb=document.getElementById("pass-banner"); if(pb) pb.style.display="none";
+  document.getElementById("screen-result").style.display="none";
+  render(); window.scrollTo({top:0,behavior:"smooth"});
+}
+
+/* ───────── PDF (attestation) ───────── */
+function generatePDF(){
+  if(state.pdfGenerated)return;
+  if(!window.jspdf||!window.jspdf.jsPDF){return;}
+  const { jsPDF }=window.jspdf;
+  const doc=new jsPDF({unit:"mm",format:"a4"});
+  const pageW=doc.internal.pageSize.getWidth(), pageH=doc.internal.pageSize.getHeight();
+  const margin=18; let y=0;
+  const NAVY=[22,36,59],BLUE=[31,78,121],OKC=[47,122,79],KOC=[178,59,59],AMB=[181,133,42];
+  const footer=()=>{const tp=doc.internal.getNumberOfPages();for(let i=1;i<=tp;i++){doc.setPage(i);doc.setFont("helvetica","italic");doc.setFontSize(8);doc.setTextColor(150,150,150);doc.text(`Page ${i} / ${tp}  —  ${PDF.footer}`,pageW/2,pageH-8,{align:"center"});}};
+  const ensure=(h)=>{if(y+h>pageH-18){doc.addPage();y=margin;}};
+
+  doc.setFillColor(...NAVY);doc.rect(0,0,pageW,38,"F");
+  doc.setTextColor(255,255,255);doc.setFont("helvetica","bold");doc.setFontSize(9);
+  doc.text(PDF.header,margin,13);
+  doc.setFontSize(15);doc.text(PDF.att_title,margin,24);
+  doc.setFont("helvetica","normal");doc.setFontSize(10);
+  doc.text(PDF.att_sub,margin,32);
+  y=50;
+
+  doc.setFillColor(239,234,223);doc.rect(margin,y,pageW-2*margin,26,"F");
+  doc.setTextColor(...BLUE);doc.setFont("helvetica","bold");doc.setFontSize(11);doc.text("Stagiaire",margin+4,y+7);
+  doc.setFont("helvetica","normal");doc.setTextColor(40,40,40);doc.setFontSize(12);doc.text(`${state.prenom} ${state.nom}`,margin+4,y+15);
+  doc.setFontSize(9);doc.setTextColor(100,100,100);
+  const dS=state.dateQuiz.toLocaleDateString("fr-FR",{day:"2-digit",month:"long",year:"numeric"});
+  const tS=state.dateQuiz.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+  doc.text(`Évaluation réalisée le ${dS} à ${tS}`,margin+4,y+22);
+  y+=36;
+
+  const pct=Math.round(state.score/QCM_N*100);
+  let col=KOC,lab="À retravailler";
+  if(PASS){ const ok=pct>=PASS; col=ok?OKC:AMB; lab=ok?"Réussite":"Seuil non atteint"; }
+  else if(pct>=90){col=OKC;lab="Excellent";}else if(pct>=70){col=BLUE;lab="Validé";}else if(pct>=50){col=AMB;lab="À consolider";}
+  doc.setFillColor(...col);doc.rect(margin,y,pageW-2*margin,28,"F");
+  doc.setTextColor(255,255,255);doc.setFont("helvetica","bold");doc.setFontSize(22);doc.text(`${state.score} / ${QCM_N}`,margin+6,y+13);
+  doc.setFontSize(11);doc.text(`(${pct}%)  —  questions à choix`,margin+6,y+22);
+  doc.setFontSize(13);doc.text(lab,pageW-margin-6,y+17,{align:"right"});
+  y+=34;
+
+  if(PASS){
+    const ok=pct>=PASS;
+    const msg = ok ? `Seuil de reussite : ${PASS} %. Objectif atteint.`
+                   : `Seuil de reussite : ${PASS} %. Objectif non atteint : refaites ce QCM afin de vous entrainer.`;
+    doc.setFont("helvetica","italic");doc.setFontSize(9);doc.setTextColor(...(ok?OKC:AMB));
+    doc.text(msg,margin,y+2); y+=8;
+  }
+  if(OPEN_N){
+    doc.setFont("helvetica","italic");doc.setFontSize(8.5);doc.setTextColor(120,120,120);
+    doc.text(`${OPEN_N} question(s) ouverte(s) : non notees automatiquement — voir la section dediee en fin de document.`,margin,y+2);
+    y+=8;
+  }
+  y+=2;
+
+  if(HAS_THEMES){
+    const st=themeStats();
+    doc.setFillColor(...NAVY);doc.rect(margin,y,pageW-2*margin,9,"F");
+    doc.setTextColor(255,255,255);doc.setFont("helvetica","bold");doc.setFontSize(11);doc.text("Bilan par thème",margin+4,y+6.2);y+=12;
+    THEME_ORDER.forEach(t=>{
+      const s=st[t]; if(!s||s.total===0) return;
+      const full=(s.ok===s.total); const cc=full?OKC:(s.ok===0?KOC:AMB);
+      ensure(7);
+      doc.setFillColor(...cc);doc.circle(margin+3,y-0.5,1.4,"F");
+      doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(55,55,55);
+      doc.text(`${t} · ${THEME_INFO[t].label}`,margin+8,y);
+      doc.setFont("helvetica","bold");doc.text(`${s.ok} / ${s.total}`,margin+92,y);
+      y+=6.5;
+    });
+    y+=4;
+  }
+
+  doc.setFillColor(...NAVY);doc.rect(margin,y,pageW-2*margin,9,"F");
+  doc.setTextColor(255,255,255);doc.setFont("helvetica","bold");doc.setFontSize(11);doc.text("Détail des réponses",margin+4,y+6.2);
+  doc.setFontSize(9);doc.text(`${QCM_N} question${QCM_N>1?"s":""} à choix`,pageW-margin-4,y+6.2,{align:"right"});y+=12;
+
+  QUESTIONS.forEach((c,i)=>{
+    if(IS_OPEN(c)) return;
+    const ans=state.answers[i], ok=isCorrect(c,ans);
+    const head=(c.th?`[${c.th}] `:"")+c.ask;
+    const qLines=doc.splitTextToSize(`${i+1}. ${head}`,pageW-2*margin-16);
+    const yLines=doc.splitTextToSize(`Votre réponse : ${answerLabel(c,ans)}`,pageW-2*margin-10);
+    const gLines=doc.splitTextToSize(`${c.multi?"Bonnes réponses":"Bonne réponse"} : ${correctLabel(c)}`,pageW-2*margin-10);
+    const eLines=doc.splitTextToSize(c.expl+(c.ref?"  ("+c.ref+")":""),pageW-2*margin-10);
+    const h=6+qLines.length*4+4+yLines.length*4+gLines.length*4+4+eLines.length*4+6;
+    ensure(h);
+    doc.setFillColor(ok?OKC[0]:KOC[0],ok?OKC[1]:KOC[1],ok?OKC[2]:KOC[2]);doc.rect(margin,y,2,h-3,"F");
+    doc.setFont("helvetica","bold");doc.setFontSize(9.5);doc.setTextColor(ok?OKC[0]:KOC[0],ok?OKC[1]:KOC[1],ok?OKC[2]:KOC[2]);doc.text(ok?"[OK]":"[X]",margin+5,y+5);
+    doc.setTextColor(55,55,55);doc.text(qLines,margin+16,y+5);
+    let yy=y+5+qLines.length*4+2;
+    doc.setFont("helvetica","bold");doc.setFontSize(8.5);doc.setTextColor(100,100,100);doc.text(yLines,margin+5,yy);yy+=yLines.length*4;
+    doc.setTextColor(40,100,60);doc.text(gLines,margin+5,yy);yy+=gLines.length*4+1;
+    doc.setFont("helvetica","italic");doc.setFontSize(8.5);doc.setTextColor(90,90,90);doc.text(eLines,margin+5,yy);
+    y+=h;
+  });
+
+  if(OPEN_N){
+    ensure(20);
+    doc.setFillColor(...NAVY);doc.rect(margin,y,pageW-2*margin,9,"F");
+    doc.setTextColor(255,255,255);doc.setFont("helvetica","bold");doc.setFontSize(11);doc.text("Questions ouvertes — votre rédaction et la réponse attendue",margin+4,y+6.2);
+    doc.setFontSize(9);doc.text(`${OPEN_N} question${OPEN_N>1?"s":""}`,pageW-margin-4,y+6.2,{align:"right"});y+=12;
+    doc.setFont("helvetica","italic");doc.setFontSize(8.5);doc.setTextColor(120,120,120);
+    const iL=doc.splitTextToSize("Ces questions ne sont pas notees automatiquement : aucune correction de texte libre ne serait fiable. Confrontez votre redaction a la reponse attendue, et sollicitez votre referent pedagogique en cas de doute.",pageW-2*margin);
+    doc.text(iL,margin,y); y+=iL.length*4+4;
+
+    let n=0;
+    QUESTIONS.forEach((c,i)=>{
+      if(!IS_OPEN(c)) return; n++;
+      const mine=(state.answers[i]||"— non renseignée —");
+      const qLines=doc.splitTextToSize(`${n}. ${(c.th?`[${c.th}] `:"")+c.ask}`,pageW-2*margin-10);
+      const aLines=doc.splitTextToSize(mine,pageW-2*margin-14);
+      const mLines=doc.splitTextToSize(c.model,pageW-2*margin-14);
+      const pLines=(c.points||[]).map(x=>doc.splitTextToSize("- "+x,pageW-2*margin-16)).flat();
+      const h=6+qLines.length*4+6+aLines.length*4+6+mLines.length*4+pLines.length*4+(c.ref?5:0)+8;
+      ensure(Math.min(h,pageH-2*margin));
+      doc.setFillColor(...BLUE);doc.rect(margin,y,2,Math.min(h-3,pageH-y-20),"F");
+      doc.setFont("helvetica","bold");doc.setFontSize(9.5);doc.setTextColor(55,55,55);
+      doc.text(qLines,margin+6,y+5); let yy=y+5+qLines.length*4+3;
+      doc.setFont("helvetica","bold");doc.setFontSize(8.5);doc.setTextColor(100,100,100);doc.text("Votre reponse :",margin+6,yy);yy+=4;
+      doc.setFont("helvetica","normal");doc.setTextColor(60,60,60);
+      aLines.forEach(l=>{ensure(5);doc.text(l,margin+10,yy);yy+=4;});
+      yy+=3;
+      doc.setFont("helvetica","bold");doc.setTextColor(40,100,60);ensure(5);doc.text("Reponse attendue :",margin+6,yy);yy+=4;
+      doc.setFont("helvetica","normal");doc.setTextColor(60,80,65);
+      mLines.forEach(l=>{ensure(5);doc.text(l,margin+10,yy);yy+=4;});
+      pLines.forEach(l=>{ensure(5);doc.text(l,margin+12,yy);yy+=4;});
+      if(c.ref){doc.setFont("helvetica","italic");doc.setTextColor(150,120,80);ensure(5);doc.text(c.ref,margin+10,yy+1);yy+=5;}
+      y=yy+6;
+    });
+  }
+
+  footer();
+  const safe=(s)=>s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9]/g,"_");
+  const df=state.dateQuiz.toISOString().slice(0,10);
+  doc.save(`${PDF.fname}_${safe(state.nom)}_${safe(state.prenom)}_${df}.pdf`);
+
+  state.pdfGenerated=true;
+}
+</script>
+
+<style id="tmk-nocopy">body{-webkit-user-select:none;-ms-user-select:none;user-select:none;}input,textarea{-webkit-user-select:text;user-select:text;}</style>
+<script>(function(){['copy','cut','paste','contextmenu','dragstart','selectstart'].forEach(function(ev){document.addEventListener(ev,function(e){var t=e.target,tag=t&&t.tagName;if(tag==='INPUT'&&(ev==='selectstart'||ev==='contextmenu'))return;e.preventDefault();return false;},true);});document.addEventListener('keydown',function(e){var k=(e.key||'').toLowerCase();if((e.ctrlKey||e.metaKey)&&['c','x','v','a','s','p','u'].indexOf(k)>-1){if(e.target&&e.target.tagName==='INPUT'&&k==='a')return;e.preventDefault();return false;}if(k==='f12'){e.preventDefault();return false;}},true);})();</script>
+</body>
+</html>
